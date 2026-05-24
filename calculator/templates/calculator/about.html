@@ -1,0 +1,160 @@
+{% extends 'calculator/base.html' %}
+{% load calculator_extras %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+
+  <!-- HERO -->
+  <div class="text-center py-5 mb-4">
+    <div style="font-size:4rem; margin-bottom:1rem;">⚗️</div>
+    <h1 style="font-family:'Outfit',sans-serif; font-size:2rem; font-weight:800; margin-bottom:1rem;">
+      <span style="background:linear-gradient(135deg,#1a6fd4,#00c896); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">
+        MedDose UZ
+      </span>
+    </h1>
+    <p style="color:var(--text-muted); font-size:1rem; max-width:600px; margin:0 auto 1.5rem; line-height:1.7;">
+      Dori vositalarini xavfsiz dozalash va farmakokinetik jarayonlarni monitoring qilish axborot tizimi.
+      Shifoxonalar, oilaviy shifokorlar va farmasevtlar uchun mo'ljallangan.
+    </p>
+    <div class="d-inline-flex align-items-center gap-2 px-4 py-2" style="background:rgba(224,60,60,0.1); border:1px solid rgba(224,60,60,0.3); border-radius:20px; color:#ff8080; font-size:0.8rem;">
+      ⚠️ Faqat ta'lim va simulyatsiya maqsadida. Haqiqiy tibbiy tashxis vositasi emas.
+    </div>
+  </div>
+
+  <!-- LOYIHA HAQIDA -->
+  <div class="row g-4 mb-4">
+    <div class="col-md-6">
+      <div class="card-glass p-4 h-100">
+        <div class="section-title"><i class="bi bi-bullseye"></i> Loyiha maqsadi</div>
+        <p style="color:var(--text-muted); font-size:0.9rem; line-height:1.7;">
+          Kasalxonalar, oilaviy shifokorlar va farmasevtlar uchun dori vositasining inson organizmidagi 
+          dinamikasini hisoblab beruvchi, qondagi konsentratsiyani vaqt bo'yicha ko'rsatuvchi va 
+          xavfli dozalar haqida ogohlantiruvchi axborot tizimi.
+        </p>
+        <p style="color:var(--text-muted); font-size:0.9rem; line-height:1.7;">
+          Tizim farmakokinetika sohasidagi ilmiy matematik modellar asosida ishlab chiqilgan bo'lib, 
+          universitet talabalariga sonli usullarni amalda qo'llashni o'rgatish uchun mo'ljallangan.
+        </p>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card-glass p-4 h-100">
+        <div class="section-title"><i class="bi bi-gear"></i> Texnologiyalar</div>
+        <div class="d-flex flex-wrap gap-2">
+          {% for tech in "Django 5|Django Templates|Bootstrap 5|Chart.js|MathJax|SQLite|Python 3|Eyler usuli|Runge-Kutta 4"|split:"|" %}
+          <span style="background:rgba(0,87,184,0.15); border:1px solid rgba(0,87,184,0.3); color:#6baeff; padding:4px 12px; border-radius:20px; font-size:0.78rem;">{{ tech }}</span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MATEMATIK MODELLAR -->
+  <div class="card-glass p-4 mb-4">
+    <div class="section-title"><i class="bi bi-calculator"></i> Matematik modellar</div>
+    <div class="row g-4">
+
+      <div class="col-md-6">
+        <div class="formula-box h-100">
+          <div style="font-weight:600; color:var(--text-main); margin-bottom:12px;">📐 Bir kamerali model</div>
+          <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:12px;">
+            Dori to'g'ridan-to'g'ri markaziy kompartmentga tushadi va bir xil eliminatsiya tezligi konstantasi bilan chiqariladi.
+          </p>
+          $$\frac{dC}{dt} = -k \cdot C$$
+          $$C(t) = C_0 \cdot e^{-kt}$$
+          <div style="margin-top:10px; font-size:0.78rem; color:var(--text-muted);">
+            Bu yerda: $C_0$ — boshlang'ich konsentratsiya, $k$ — eliminatsiya konstantasi
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="formula-box h-100">
+          <div style="font-weight:600; color:var(--text-main); margin-bottom:12px;">📐 Ikki kamerali model</div>
+          <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:12px;">
+            Dori avval depo kamerasiga (oshqozon, teri osti) kirib, so'ng qonga o'tadi — absorbsiya va eliminatsiya jarayonlari parallel kechadi.
+          </p>
+          $$\frac{dC_{depo}}{dt} = -k_a \cdot C_{depo}$$
+          $$\frac{dC_{qon}}{dt} = k_a \cdot C_{depo} - k_e \cdot C_{qon}$$
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="formula-box h-100">
+          <div style="font-weight:600; color:var(--text-main); margin-bottom:12px;">🔢 Eyler usuli (1-tartib)</div>
+          <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:12px;">
+            Eng sodda va tezkor sonli usul. Xatolik $O(h)$ tartibida — vaqt qadami kichraygan sari aniqlik oshadi.
+          </p>
+          $$y_{n+1} = y_n + h \cdot f(t_n, y_n)$$
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="formula-box h-100">
+          <div style="font-weight:600; color:var(--text-main); margin-bottom:12px;">🔢 Runge-Kutta 4-tartibli usuli</div>
+          <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:12px;">
+            Eylerga nisbatan ancha aniq ($O(h^4)$). Har bir qadamda 4 ta hosila baholanadi.
+          </p>
+          $$k_1 = f(t_n, y_n)$$
+          $$k_2 = f\!\left(t_n+\tfrac{h}{2},\, y_n+\tfrac{h k_1}{2}\right)$$
+          $$k_3 = f\!\left(t_n+\tfrac{h}{2},\, y_n+\tfrac{h k_2}{2}\right)$$
+          $$k_4 = f(t_n+h,\, y_n+h k_3)$$
+          $$y_{n+1} = y_n + \tfrac{h}{6}(k_1 + 2k_2 + 2k_3 + k_4)$$
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- FUNKSIYALAR -->
+  <div class="card-glass p-4 mb-4">
+    <div class="section-title"><i class="bi bi-list-check"></i> Tizim funksiyalari</div>
+    <div class="row g-3">
+      {% for feature in features %}
+      <div class="col-md-6 col-lg-4">
+        <div class="d-flex align-items-start gap-3 p-3" style="background:var(--bg-card2); border-radius:10px; border:1px solid var(--border);">
+          <div style="color:var(--accent); font-size:1.2rem;">✔</div>
+          <div style="font-size:0.86rem; color:var(--text-muted);">{{ feature }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- FOYDALANUVCHILAR -->
+  <div class="row g-4 mb-4">
+    <div class="col-md-4">
+      <div class="card-glass p-4 text-center h-100">
+        <div style="font-size:2.5rem; margin-bottom:0.8rem;">🏥</div>
+        <div style="font-weight:600; color:var(--text-main); margin-bottom:6px;">Shifoxonalar</div>
+        <div style="font-size:0.83rem; color:var(--text-muted);">Bemorlar uchun dori dozasini xavfsiz hisoblash va monitoring</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card-glass p-4 text-center h-100">
+        <div style="font-size:2.5rem; margin-bottom:0.8rem;">👨‍⚕️</div>
+        <div style="font-weight:600; color:var(--text-main); margin-bottom:6px;">Shifokorlar</div>
+        <div style="font-size:0.83rem; color:var(--text-muted);">Oilaviy shifokorlar va farmasevtlar uchun professional vosita</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card-glass p-4 text-center h-100">
+        <div style="font-size:2.5rem; margin-bottom:0.8rem;">🎓</div>
+        <div style="font-weight:600; color:var(--text-main); margin-bottom:6px;">Universitetlar</div>
+        <div style="font-size:0.83rem; color:var(--text-muted);">Tibbiyot talabalari uchun interaktiv o'quv simulyatori</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="text-center py-4 mb-2">
+    <a href="{% url 'calculator:index' %}" class="btn-primary-grad d-inline-flex align-items-center gap-2" style="padding:0.85rem 2.5rem; font-size:1.05rem; border-radius:12px; text-decoration:none;">
+      <i class="bi bi-play-circle-fill"></i>
+      Hisoblashni boshlash
+    </a>
+  </div>
+
+</div>
+{% endblock %}

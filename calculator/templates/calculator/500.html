@@ -1,0 +1,16 @@
+{% extends 'calculator/base.html' %}
+
+{% block content %}
+<div class="container py-5 text-center">
+  <div style="font-size:4rem; margin-bottom:1.5rem;">💥</div>
+  <h1 style="font-family:'Outfit',sans-serif; font-size:1.8rem; font-weight:700; margin-bottom:1rem;">
+    Server xatosi
+  </h1>
+  <p style="color:var(--text-muted); margin-bottom:2rem;">
+    Ichki server xatosi yuz berdi. Iltimos, keyinroq urinib ko'ring.
+  </p>
+  <a href="{% url 'calculator:index' %}" class="btn-primary-grad d-inline-flex align-items-center gap-2" style="padding:0.7rem 1.8rem; border-radius:10px; text-decoration:none;">
+    <i class="bi bi-house"></i> Bosh sahifaga qaytish
+  </a>
+</div>
+{% endblock %}

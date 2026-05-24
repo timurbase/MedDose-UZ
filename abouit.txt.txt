@@ -1,0 +1,153 @@
+Siz Senior Django Developer, HealthTech Startup Architect va Sonli usullar bo‘yicha amaliy matematika mentori sifatida ishlaysiz.
+
+Menga universitet uchun “MedDose UZ — Dori vositalarini xavfsiz dozalash va farmakokinetik jarayonlarni monitoring qilish axborot tizimi” nomli loyiha yaratishda yordam bering.
+
+MUHIM:
+Loyiha React yoki alohida frontend ishlatmaydi.
+Frontend va backend bir xil Django project ichida bo‘ladi.
+Django Templates asosida ishlab chiqilsin.
+
+Texnologiyalar:
+
+* Backend: Django
+* Frontend: Django Templates
+* UI: HTML, CSS, Bootstrap 5
+* Grafiklar: Chart.js
+* Formula ko‘rsatish: MathJax
+* Database: SQLite
+* Deploy: Render yoki Railway
+* Login/Register: kerak emas
+* REST API: kerak emas
+* Mobile app emas
+
+Loyiha maqsadi:
+Kasalxonalar, oilaviy shifokorlar va farmasevtlar uchun dori vositasining inson organizmidagi dinamikasini hisoblab beruvchi, qondagi konsentratsiyani vaqt bo‘yicha ko‘rsatuvchi va xavfli dozalar haqida ogohlantiruvchi axborot tizimi yaratish.
+
+Asosiy funksiyalar:
+
+1. Bemor vaznini kiritish
+2. Bemor yoshini kiritish
+3. Dori turini tanlash
+4. Dori yuborish usulini tanlash: tabletka, ukol, kapelnitsa
+5. Dori dozasini kiritish
+6. Vaqt oralig‘i va vaqt qadamini kiritish
+7. Bir kamerali farmakokinetik modelni hisoblash
+8. Ikki kamerali farmakokinetik modelni hisoblash
+9. Eyler usuli orqali hisoblash
+10. 4-tartibli Runge-Kutta usuli orqali hisoblash
+11. Eyler va RK4 natijalarini solishtirish
+12. Qondagi dori konsentratsiyasi grafigini chiqarish
+13. Minimal samarali chegara va maksimal toksik chegarani ko‘rsatish
+14. Agar dori miqdori toksik zonaga chiqsa, qizil ogohlantirish chiqarish
+15. Agar dori miqdori terapevtik zonadan pastga tushsa, samaradorlik kamaygani haqida ogohlantirish
+16. Keyingi doza vaqtini taxminiy tavsiya qilish
+
+Matematik asos:
+
+* Bir kamerali model:
+  dC/dt = -k * C
+
+* Ikki kamerali model:
+  dC_depo/dt = -ka * C_depo
+  dC_qon/dt = ka * C_depo - ke * C_qon
+
+* Eyler usuli:
+  y_n+1 = y_n + h * f(t_n, y_n)
+
+* Runge-Kutta 4-tartibli usuli:
+  k1 = f(t_n, y_n)
+  k2 = f(t_n + h/2, y_n + h*k1/2)
+  k3 = f(t_n + h/2, y_n + h*k2/2)
+  k4 = f(t_n + h, y_n + h*k3)
+  y_n+1 = y_n + h/6 * (k1 + 2*k2 + 2*k3 + k4)
+
+Tizimda quyidagi modullar bo‘lsin:
+
+1. Input Data UI:
+
+   * bemor vazni
+   * bemor yoshi
+   * dori nomi
+   * dori yuborish usuli
+   * doza
+   * k, ka, ke koeffitsiyentlari
+   * vaqt oralig‘i
+   * vaqt qadami
+
+2. Mathematical Engine:
+
+   * one_compartment_model()
+   * two_compartment_model()
+   * euler_method()
+   * rk4_method()
+   * calculate_concentration()
+   * detect_risk_zone()
+
+3. Visualization:
+
+   * Chart.js orqali vaqt-konsentratsiya grafigi
+   * Eyler va RK4 chiziqlarini solishtirish
+   * Toksik zona chizig‘i
+   * Minimal terapevtik zona chizig‘i
+
+4. Alert System:
+
+   * “DIQQAT! Dori dozasi toksik zonaga chiqdi”
+   * “Dori konsentratsiyasi terapevtik darajadan past”
+   * “Doza xavfsiz intervalda”
+
+Startup modeli:
+Mijozlar:
+
+* Shifoxonalar
+* Oilaviy poliklinikalar
+* Farmasevtlar
+* Tibbiyot universitetlari
+* Online tibbiy maslahat platformalari
+
+Daromad modeli:
+
+* Shifoxonalar uchun obuna
+* Farmasevtlar uchun professional monitoring paneli
+* Universitetlar uchun o‘quv simulyatori
+* Premium dori bazasi
+* Tibbiy axborot tizimlari bilan integratsiya
+
+Kelajakdagi imkoniyatlar:
+
+* Elektron tibbiy karta bilan integratsiya
+* Dori bazasi
+* AI dozalash tavsiyasi
+* Shifokor paneli
+* SMS/Telegram ogohlantirish
+* Kasalxona axborot tizimlari bilan integratsiya
+
+Quyidagilarni professional tarzda ishlab chiqing:
+
+* Full Django project structure
+* Professional folder structure
+* settings.py konfiguratsiyasi
+* urls.py routing
+* views.py logikasi
+* models.py
+* forms.py
+* Bootstrap UI design
+* Responsive templates
+* Chart.js integratsiyasi
+* MathJax integratsiyasi
+* Sonli usullar algoritmi
+* Eyler va Runge-Kutta kodlari
+* Farmakokinetik model hisoblash logikasi
+* Alert system
+* Clean code architecture
+* README.md
+* Deployment guide
+* GitHub uchun professional structure
+
+Kodlarni step-by-step yozing.
+Har bir faylni alohida tushuntiring.
+Minimalistik va zamonaviy HealthTech dizayn ishlating.
+UI oq, ko‘k va yashil ranglarga asoslangan bo‘lsin.
+
+Eslatma:
+Bu loyiha real tibbiy tashxis yoki davolash vositasi emas, faqat universitet uchun ilmiy-amaliy simulyatsiya va axborot tizimi prototipi sifatida ishlab chiqilsin.

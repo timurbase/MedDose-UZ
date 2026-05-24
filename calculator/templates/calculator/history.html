@@ -1,0 +1,93 @@
+{% extends 'calculator/base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 style="font-family:'Outfit',sans-serif; font-size:1.4rem; font-weight:700;">
+      <i class="bi bi-clock-history me-2" style="color:var(--accent);"></i>Hisoblashlar tarixi
+    </h2>
+    {% if calculations %}
+    <form method="post" action="{% url 'calculator:clear_history' %}"
+          onsubmit="return confirm('Barcha tarixni o\'chirishga ishonchingiz komilmi?');">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-sm" style="background:rgba(224,60,60,0.15); border:1px solid rgba(224,60,60,0.4); color:#ff7878; border-radius:8px; font-size:0.82rem;">
+        <i class="bi bi-trash me-1"></i>Tarixni tozalash
+      </button>
+    </form>
+    {% endif %}
+  </div>
+
+  {% if calculations %}
+  <div class="card-glass">
+    <div class="table-responsive">
+      <table class="table mb-0" style="color:var(--text-main); font-size:0.86rem;">
+        <thead>
+          <tr style="border-color:var(--border);">
+            <th style="color:var(--text-muted); font-weight:500; padding:1rem 1.2rem; background:var(--bg-card); border-color:var(--border);">Dori</th>
+            <th style="color:var(--text-muted); font-weight:500; padding:1rem; background:var(--bg-card); border-color:var(--border);">Bemor</th>
+            <th style="color:var(--text-muted); font-weight:500; padding:1rem; background:var(--bg-card); border-color:var(--border);">Doza</th>
+            <th style="color:var(--text-muted); font-weight:500; padding:1rem; background:var(--bg-card); border-color:var(--border);">Usul</th>
+            <th style="color:var(--text-muted); font-weight:500; padding:1rem; background:var(--bg-card); border-color:var(--border);">Model</th>
+            <th style="color:var(--text-muted); font-weight:500; padding:1rem; background:var(--bg-card); border-color:var(--border);">Max konsentratsiya</th>
+            <th style="color:var(--text-muted); font-weight:500; padding:1rem; background:var(--bg-card); border-color:var(--border);">Holat</th>
+            <th style="color:var(--text-muted); font-weight:500; padding:1rem; background:var(--bg-card); border-color:var(--border);">Vaqt</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for calc in calculations %}
+          <tr style="border-color:var(--border); transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.03)'" onmouseout="this.style.background='transparent'">
+            <td style="padding:0.9rem 1.2rem; font-weight:500;">{{ calc.drug_name }}</td>
+            <td style="padding:0.9rem 1rem;">
+              {{ calc.patient_weight }}kg · {{ calc.patient_age }}yosh
+            </td>
+            <td style="padding:0.9rem 1rem;">{{ calc.dose }}mg</td>
+            <td style="padding:0.9rem 1rem;">
+              {% if calc.route == 'oral' %}💊 Tabletka
+              {% elif calc.route == 'injection' %}💉 Ukol
+              {% else %}🩸 Kapelnitsa{% endif %}
+            </td>
+            <td style="padding:0.9rem 1rem;">
+              {% if calc.model_type == 'one' %}1 kamerali{% else %}2 kamerali{% endif %}
+            </td>
+            <td style="padding:0.9rem 1rem;">
+              {% if calc.max_concentration %}
+                {{ calc.max_concentration }} mg/L
+              {% else %}—{% endif %}
+            </td>
+            <td style="padding:0.9rem 1rem;">
+              {% if calc.risk_status == 'toxic' %}
+                <span class="badge" style="background:rgba(224,60,60,0.2); color:#ff7878; border:1px solid rgba(224,60,60,0.4); padding:4px 10px; border-radius:6px;">☣️ Toksik</span>
+              {% elif calc.risk_status == 'subtherapeutic' %}
+                <span class="badge" style="background:rgba(245,166,35,0.2); color:#ffc46a; border:1px solid rgba(245,166,35,0.4); padding:4px 10px; border-radius:6px;">📉 Past</span>
+              {% elif calc.risk_status == 'safe' %}
+                <span class="badge" style="background:rgba(0,200,150,0.15); color:var(--accent); border:1px solid rgba(0,200,150,0.3); padding:4px 10px; border-radius:6px;">✅ Xavfsiz</span>
+              {% else %}
+                <span style="color:var(--text-muted);">—</span>
+              {% endif %}
+            </td>
+            <td style="padding:0.9rem 1rem; color:var(--text-muted); font-size:0.78rem;">
+              {{ calc.created_at|date:"d.m.Y H:i" }}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% else %}
+  <div class="card-glass p-5 text-center">
+    <div style="font-size:3.5rem; margin-bottom:1rem;">📊</div>
+    <h3 style="font-family:'Outfit',sans-serif; font-size:1.2rem; color:var(--text-muted); margin-bottom:0.5rem;">Hisoblashlar tarixi bo'sh</h3>
+    <p style="color:var(--text-muted); font-size:0.88rem;">Hali birorta hisoblash amalga oshirilmagan.</p>
+    <a href="{% url 'calculator:index' %}" class="btn-primary-grad mt-3 d-inline-flex align-items-center gap-2" style="padding:0.65rem 1.5rem; border-radius:10px; text-decoration:none;">
+      <i class="bi bi-calculator"></i> Hisoblashni boshlash
+    </a>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

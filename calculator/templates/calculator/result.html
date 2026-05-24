@@ -1,0 +1,395 @@
+{% extends 'calculator/base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+
+  <!-- BREADCRUMB -->
+  <nav class="mb-3" style="font-size:0.82rem; color:var(--text-muted);">
+    <a href="{% url 'calculator:index' %}" style="color:var(--text-muted); text-decoration:none;">
+      <i class="bi bi-house me-1"></i>Bosh sahifa
+    </a>
+    <span class="mx-2">/</span>
+    <span style="color:var(--text-main);">Natijalar — {{ drug_name }}</span>
+  </nav>
+
+  <!-- RISK ALERT -->
+  <div class="mb-4">
+    {% if risk_info.status == 'toxic' %}
+      <div class="alert-toxic p-4 pulse-danger" style="border-radius:14px;">
+        <div class="d-flex align-items-start gap-3">
+          <div style="font-size:2rem;">☣️</div>
+          <div>
+            <div style="font-size:1.1rem; font-weight:700; margin-bottom:4px;">DIQQAT! Toksik zona!</div>
+            <div style="font-size:0.9rem; opacity:0.9;">{{ risk_info.message }}</div>
+          </div>
+        </div>
+      </div>
+    {% elif risk_info.status == 'subtherapeutic' %}
+      <div class="alert-sub p-4" style="border-radius:14px;">
+        <div class="d-flex align-items-start gap-3">
+          <div style="font-size:2rem;">📉</div>
+          <div>
+            <div style="font-size:1.1rem; font-weight:700; margin-bottom:4px;">Terapevtik darajadan past</div>
+            <div style="font-size:0.9rem; opacity:0.9;">{{ risk_info.message }}</div>
+          </div>
+        </div>
+      </div>
+    {% else %}
+      <div class="alert-safe p-4" style="border-radius:14px;">
+        <div class="d-flex align-items-start gap-3">
+          <div style="font-size:2rem;">✅</div>
+          <div>
+            <div style="font-size:1.1rem; font-weight:700; margin-bottom:4px;">Doza xavfsiz intervalda</div>
+            <div style="font-size:0.9rem; opacity:0.9;">{{ risk_info.message }}</div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- STAT CARDS -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+      <div class="stat-card">
+        <div class="stat-value">{{ risk_info.max_C }}</div>
+        <div class="stat-label">Maks. konsentratsiya (mg/L)</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card">
+        <div class="stat-value">{{ data.dose }}</div>
+        <div class="stat-label">Doza (mg)</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card">
+        <div class="stat-value">{{ next_dose.time|default:"—" }}</div>
+        <div class="stat-label">Keyingi doza (soat)</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card">
+        <div class="stat-value">{{ data.t_end|floatformat:0 }}h</div>
+        <div class="stat-label">Kuzatuv davri</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+
+    <!-- MAIN CHART + COMPARISON -->
+    <div class="col-lg-8">
+
+      <!-- Asosiy grafik -->
+      <div class="card-glass p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div style="font-family:'Outfit',sans-serif; font-weight:600; font-size:1rem;">
+            <i class="bi bi-graph-up me-2" style="color:var(--accent);"></i>
+            Qondagi dori konsentratsiyasi
+          </div>
+          <div style="font-size:0.78rem; color:var(--text-muted);">mg/L — vaqt (soat)</div>
+        </div>
+        <div style="position:relative; width:100%; height:380px;">
+          <canvas id="mainChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Eyler vs RK4 xato grafigi -->
+      {% if comparison %}
+      <div class="card-glass p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div style="font-family:'Outfit',sans-serif; font-weight:600; font-size:1rem;">
+            <i class="bi bi-bar-chart me-2" style="color:var(--warning);"></i>
+            Eyler vs RK4 — Absolyut xatoliklar
+          </div>
+        </div>
+        <div style="position:relative; width:100%; height:260px;">
+          <canvas id="errorChart"></canvas>
+        </div>
+        <div class="row mt-3 g-2">
+          <div class="col-6">
+            <div class="stat-card" style="padding:0.8rem;">
+              <div style="font-size:1.1rem; font-weight:700; color:#fd7e14; font-family:'Outfit',sans-serif;">{{ comparison.max_euler_err }}</div>
+              <div class="stat-label">Max Eyler xatosi</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="stat-card" style="padding:0.8rem;">
+              <div style="font-size:1.1rem; font-weight:700; color:#198754; font-family:'Outfit',sans-serif;">{{ comparison.max_rk4_err }}</div>
+              <div class="stat-label">Max RK4 xatosi</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="col-lg-4">
+
+      <!-- Parametrlar jadvali -->
+      <div class="card-glass p-4 mb-3">
+        <div class="section-title" style="font-size:0.88rem;"><i class="bi bi-person-badge"></i> Hisoblash parametrlari</div>
+        <table style="width:100%; font-size:0.84rem; border-collapse:collapse;">
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="color:var(--text-muted); padding:6px 0;">Dori nomi</td>
+            <td style="color:var(--text-main); text-align:right; font-weight:500;">{{ drug_name }}</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="color:var(--text-muted); padding:6px 0;">Bemor</td>
+            <td style="color:var(--text-main); text-align:right;">{{ data.patient_weight }} kg · {{ data.patient_age }} yosh</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="color:var(--text-muted); padding:6px 0;">Yuborish usuli</td>
+            <td style="color:var(--text-main); text-align:right;">
+              {% if data.route == 'oral' %}💊 Tabletka
+              {% elif data.route == 'injection' %}💉 Ukol
+              {% else %}🩸 Kapelnitsa{% endif %}
+            </td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="color:var(--text-muted); padding:6px 0;">Model</td>
+            <td style="color:var(--text-main); text-align:right;">
+              {% if data.model_type == 'one' %}1-kamerali{% else %}2-kamerali{% endif %}
+            </td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="color:var(--text-muted); padding:6px 0;">
+              {% if data.model_type == 'one' %}k (1/soat){% else %}ka / ke{% endif %}
+            </td>
+            <td style="color:var(--text-main); text-align:right;">
+              {% if data.model_type == 'one' %}{{ data.k }}{% else %}{{ data.ka }} / {{ data.ke }}{% endif %}
+            </td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="color:var(--text-muted); padding:6px 0;">Terapevtik oraliq</td>
+            <td style="color:var(--text-main); text-align:right;">
+              <span style="color:var(--accent);">{{ mic }}</span>
+              <span style="color:var(--text-muted);">–</span>
+              <span style="color:#ff7878;">{{ mtc }}</span> mg/L
+            </td>
+          </tr>
+          <tr>
+            <td style="color:var(--text-muted); padding:6px 0;">Vaqt / Qadam</td>
+            <td style="color:var(--text-main); text-align:right;">{{ data.t_end }}h / {{ data.h }}h</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- Formulalar -->
+      <div class="card-glass p-4 mb-3">
+        <div class="section-title" style="font-size:0.88rem;"><i class="bi bi-calculator"></i> Qo'llangan formulalar</div>
+        {% if data.model_type == 'one' %}
+          <div class="formula-box mb-2" style="font-size:0.82rem;">
+            <div style="color:var(--text-muted); margin-bottom:6px; font-size:0.75rem;">Bir kamerali model:</div>
+            $$\frac{dC}{dt} = -k \cdot C, \quad C(t) = C_0 e^{-kt}$$
+          </div>
+        {% else %}
+          <div class="formula-box mb-2" style="font-size:0.82rem;">
+            <div style="color:var(--text-muted); margin-bottom:6px; font-size:0.75rem;">Ikki kamerali model:</div>
+            $$\frac{dC_{depo}}{dt} = -k_a C_{depo}$$
+            $$\frac{dC_{qon}}{dt} = k_a C_{depo} - k_e C_{qon}$$
+          </div>
+        {% endif %}
+        <div class="formula-box" style="font-size:0.82rem;">
+          <div style="color:var(--text-muted); margin-bottom:6px; font-size:0.75rem;">RK4 usuli:</div>
+          $$y_{n+1} = y_n + \frac{h}{6}(k_1 + 2k_2 + 2k_3 + k_4)$$
+        </div>
+      </div>
+
+      <!-- Keyingi doza -->
+      <div class="card-glass p-4 mb-3">
+        <div class="section-title" style="font-size:0.88rem;"><i class="bi bi-alarm"></i> Keyingi doza tavsiyasi</div>
+        {% if next_dose.time %}
+          <div style="font-size:1.9rem; font-weight:700; font-family:'Outfit',sans-serif; color:var(--accent); margin-bottom:6px;">
+            {{ next_dose.formatted }}
+          </div>
+        {% endif %}
+        <div style="font-size:0.83rem; color:var(--text-muted); line-height:1.5;">{{ next_dose.recommendation }}</div>
+      </div>
+
+      <!-- Harakatlar -->
+      <div class="d-grid gap-2">
+        <a href="{% url 'calculator:index' %}" class="btn-primary-grad text-center text-decoration-none d-flex align-items-center justify-content-center gap-2" style="height:44px;">
+          <i class="bi bi-arrow-left"></i> Yangi hisoblash
+        </a>
+        <a href="{% url 'calculator:history' %}" class="btn btn-sm" style="height:38px; display:flex; align-items:center; justify-content:center; border-radius:10px; border:1px solid var(--border); color:var(--text-muted); font-size:0.88rem; background:transparent; gap:6px;">
+          <i class="bi bi-clock-history"></i> Barcha tarixni ko'rish
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+// MedDose UZ — Chart.js (scatter + showLine)
+// ═══════════════════════════════════════════════════════════════════════════
+(function() {
+  'use strict';
+
+  var allDatasets = JSON.parse('{{ chart_datasets_json|escapejs }}');
+  var mic = {{ mic_json|safe }};
+  var mtc = {{ mtc_json|safe }};
+  var tEnd = {{ t_end_json|safe }};
+
+  // MIC gorizontal chiziq
+  allDatasets.push({
+    label: 'MIC (' + mic + ' mg/L)',
+    data: [{x: 0, y: mic}, {x: tEnd, y: mic}],
+    borderColor: '#00c896',
+    backgroundColor: 'transparent',
+    borderWidth: 2,
+    borderDash: [8, 4],
+    pointRadius: 0,
+    showLine: true,
+    fill: false
+  });
+
+  // MTC gorizontal chiziq
+  allDatasets.push({
+    label: 'MTC (' + mtc + ' mg/L)',
+    data: [{x: 0, y: mtc}, {x: tEnd, y: mtc}],
+    borderColor: '#e03c3c',
+    backgroundColor: 'transparent',
+    borderWidth: 2,
+    borderDash: [8, 4],
+    pointRadius: 0,
+    showLine: true,
+    fill: false
+  });
+
+  // ── ASOSIY GRAFIK ───────────────────────────────────────────────────────
+  var el = document.getElementById('mainChart');
+  if (el) {
+    var chart1 = new Chart(el, {
+      type: 'scatter',
+      data: { datasets: allDatasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 800 },
+        interaction: { mode: 'nearest', intersect: false },
+        plugins: {
+          legend: {
+            display: true,
+            position: 'top',
+            labels: {
+              color: '#8ea0bc',
+              font: { size: 11, family: "'Inter', sans-serif" },
+              usePointStyle: true,
+              padding: 14,
+              boxWidth: 12
+            }
+          },
+          tooltip: {
+            backgroundColor: 'rgba(10,15,30,0.97)',
+            titleColor: '#e8edf7',
+            bodyColor: '#c0cfea',
+            borderColor: '#1e2d46',
+            borderWidth: 1,
+            padding: 12,
+            cornerRadius: 8,
+            callbacks: {
+              label: function(ctx) {
+                var p = ctx.parsed;
+                return ctx.dataset.label + ': ' + p.y.toFixed(4) + ' mg/L (t=' + p.x.toFixed(1) + 'h)';
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            type: 'linear',
+            title: { display: true, text: 'Vaqt (soat)', color: '#8ea0bc', font: { size: 12 } },
+            grid: { color: 'rgba(30,45,70,0.5)' },
+            ticks: { color: '#8ea0bc' },
+            min: 0,
+            max: tEnd
+          },
+          y: {
+            type: 'linear',
+            title: { display: true, text: 'Konsentratsiya (mg/L)', color: '#8ea0bc', font: { size: 12 } },
+            grid: { color: 'rgba(30,45,70,0.5)' },
+            ticks: { color: '#8ea0bc' },
+            beginAtZero: true
+          }
+        }
+      }
+    });
+    console.log('[MedDose] mainChart OK — ' + allDatasets.length + ' datasets');
+  } else {
+    console.error('[MedDose] mainChart canvas TOPILMADI!');
+  }
+
+  // ── XATO SOLISHTIRISH GRAFIGI ───────────────────────────────────────────
+  {% if comparison %}
+  var compDatasets = JSON.parse('{{ comparison_datasets_json|escapejs }}');
+  var el2 = document.getElementById('errorChart');
+  if (el2) {
+    new Chart(el2, {
+      type: 'scatter',
+      data: { datasets: compDatasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 600 },
+        interaction: { mode: 'nearest', intersect: false },
+        plugins: {
+          legend: {
+            display: true,
+            labels: {
+              color: '#8ea0bc',
+              font: { size: 11 },
+              usePointStyle: true,
+              padding: 12
+            }
+          },
+          tooltip: {
+            backgroundColor: 'rgba(10,15,30,0.97)',
+            titleColor: '#e8edf7',
+            bodyColor: '#c0cfea',
+            borderColor: '#1e2d46',
+            borderWidth: 1,
+            padding: 10,
+            cornerRadius: 8,
+            callbacks: {
+              label: function(ctx) {
+                var p = ctx.parsed;
+                return ctx.dataset.label + ': ' + p.y.toExponential(4);
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            type: 'linear',
+            title: { display: true, text: 'Vaqt (soat)', color: '#8ea0bc', font: { size: 11 } },
+            grid: { color: 'rgba(30,45,70,0.5)' },
+            ticks: { color: '#8ea0bc' },
+            min: 0
+          },
+          y: {
+            type: 'linear',
+            title: { display: true, text: 'Absolyut xatolik', color: '#8ea0bc', font: { size: 11 } },
+            grid: { color: 'rgba(30,45,70,0.5)' },
+            ticks: { color: '#8ea0bc' },
+            beginAtZero: true
+          }
+        }
+      }
+    });
+    console.log('[MedDose] errorChart OK — ' + compDatasets.length + ' datasets');
+  }
+  {% endif %}
+
+})();
+</script>
+{% endblock %}
