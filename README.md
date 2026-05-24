@@ -12,7 +12,6 @@
 ---
 
 ## 📋 Loyiha haqida
-
 MedDose UZ — kasalxonalar, oilaviy shifokorlar va farmasevtlar uchun mo'ljallangan interaktiv farmakokinetik monitoring tizimi. Tizim dori vositasining inson organizmidagi dinamikasini hisoblab beradi, qondagi konsentratsiyani vaqt bo'yicha ko'rsatadi va xavfli dozalar haqida ogohlantiradi.
 
 ## ✨ Asosiy funksiyalar
